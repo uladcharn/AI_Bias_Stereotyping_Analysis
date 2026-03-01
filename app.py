@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import json
 
-st.set_page_config(page_title="SLM Translator", page_icon="🌍", layout="centered")
+st.set_page_config(page_title="SLM Resume Evaluatior", page_icon="🌍", layout="centered")
 
 st.title("🌍 CPU-based SLM Resume Evaluator")
 st.write("Test resume screening with a local llama.cpp model served on CPU.")
@@ -80,7 +80,7 @@ if st.button("Evaluate Candidate"):
         with st.spinner("Analyzing candidate..."):
             # Prepare payload for llama-server
             payload = {
-                "prompt": prompt, # f"{system_prompt}\n\nResume:\n{source_text}"
+                "prompt": prompt,
                 "n_predict": 512, # Max tokens to generate
                 "temperature": 0.3
             }
