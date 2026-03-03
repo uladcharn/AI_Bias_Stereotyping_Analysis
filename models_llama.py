@@ -6,10 +6,9 @@ import json
 from textblob import TextBlob
 
 class SLMModelInstance:
-    def __init__(self, system_prompt, n_iter = 25, temp = 0.3, max_tokens = 512, 
-                 model_path = "./llama.cpp/models/Phi-3.5-mini-instruct-Q4_K_M.gguf", port = 8080, return_full_text = False):
+    def __init__(self, model_path = "./llama.cpp/models/Phi-3.5-mini-instruct-Q4_K_M.gguf",
+                 n_iter = 25, temp = 0.2, max_tokens = 512, port = 8080, return_full_text = False):
 
-        self.user_prompt = system_prompt
         self.n_iter = n_iter
         self.temp = temp
         self.max_tokens = max_tokens
@@ -55,9 +54,9 @@ class SLMModelInstance:
         
         raise TimeoutError("Llama server failed to start in time.")
 
-    def get_answer(self):
+    def get_answer(self, user_prompt):
         payload = {
-            "prompt": self.user_prompt,
+            "prompt": user_prompt,
             "n_predict": self.max_tokens,
             "temperature": self.temp
         }
@@ -76,30 +75,55 @@ class SLMModelInstance:
             print(f"An unexpected error occurred: {err}")
 
 
-    def collect_responses(self):
+    def collect_responses(self, user_prompt):
         data = {"response":[], "AI-score": [], "S-score": [], "Fav-score": []}
 
-        for _ in range(self.n_iter):
-            generated_text = self.get_answer()
+        for i in range(self.n_iter):
+            generated_text = self.get_answer(user_prompt)
 
-            json_start = generated_text.find('{')
-            json_end = generated_text.rfind('}') + 1
-            json_data = json.loads(generated_text[json_start:json_end])
+            # json_start = generated_text.find('{')
+            # json_end = generated_text.rfind('}') + 1
+            # json_data = json.loads(generated_text[json_start:json_end])
 
-            response = json_data["description"]
-            score = json_data["score"]
-            approval = json_data["approval"]
+            # response = json_data["description"]
+            # score = json_data["score"]
+            # approval = json_data["approval"]
 
-            sentiment = TextBlob(response).sentiment.polarity
+            # sentiment = TextBlob(response).sentiment.polarity
+
+            sentiment = TextBlob(generated_text).sentiment.polarity
             
-            is_favorable = 1 if approval == "Approve" in response else 0
+            is_favorable = 1 if "Approve" in generated_text else 0
 
-            data["response"].append(response)
-            data["AI-score"].append(score)
+            # data["response"].append(response)
+            # data["AI-score"].append(score)
             data["S-score"].append(sentiment)
             data["Fav-score"].append(is_favorable)
 
+            print(f"iter: {i}")
+
         return data
+    
+    def stop_server(self):
+        if hasattr(self, 'server_process') and self.server_process:
+            print(f"Shutting down Llama server on port {self.port}...")
+            
+            # Send termination signal (SIGTERM)
+            self.server_process.terminate()
+            
+            try:
+                # Wait up to 5 seconds for it to exit gracefully
+                self.server_process.wait(timeout=5)
+                print("Server stopped successfully.")
+            except subprocess.TimeoutExpired:
+                # Force kill (SIGKILL) if it's being stubborn
+                print("Server didn't stop in time, forcing exit...")
+                self.server_process.kill()
+                self.server_process.wait()
+            
+            self.server_process = None
+        else:
+            print("No active server process found to stop.")
     
     def __del__(self):
         """Cleanup when the object is deleted."""
