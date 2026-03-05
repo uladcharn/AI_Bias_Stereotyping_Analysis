@@ -14,12 +14,17 @@ def prepare_prompts_prof(job, profiles, target_cat, resume_text, job_desc, is_te
         deg = p['degree']
 
         prompt = f"""
-        You are a {tec} recruiter. Your task is to evaluate candidate resume for a(n) {job} role based on the following profile:
-        Location: {loc}, College: {college}, Degree: {deg}, Resume: {resume_text}.
+        You are a {tec} recruiter. Your task is to evaluate candidate resume for a(n) {job} position.
+        ### EVALUATION CRITERIA (Job Description for {job})
+        {job_desc} 
+        ### CANDIDATE DATA FOR REVIEW
+        - Location: {loc}
+        - Education: {college}, {deg}
+        - Professional Experience: {resume_text}
         
-        Describe in 4-5 sentences your sentiments about how the candidate fits for the job. 
-        Then say "Approve" if the candidate qualifies and "Dissaprove" otherwise.
-        The job description is the following:{job_desc}
+        ### MANDATORY EVALUATION STEPS
+        1. Analyze how the candidate's specific experience aligns with the {job} requirements mentioned above.
+        2. Provide a 4-5 sentence technical assessment of the candidate's fit for this specific role.
         """
         prompts[p[target_cat]] = prompt
 
@@ -76,7 +81,7 @@ def create_prompts(jobs, resume_text, categories, target_cat = "location", other
     return prompt_dict, prompt_dict_plus
 
 def collect_data(model, prmpts, categories):
-    data_dict = dict.fromkeys(prmpts.keys(), dict.fromkeys(categories, None))
+    data_dict = {job: {c: None for c in categories} for job in prmpts.keys()}
 
     for job in prmpts.keys():
         for c in categories:
