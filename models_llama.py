@@ -89,16 +89,14 @@ class SLMModelInstance:
             # score = json_data["score"]
             # approval = json_data["approval"]
 
-            # sentiment = TextBlob(response).sentiment.polarity
-
             sentiment = TextBlob(generated_text).sentiment.polarity
             
-            is_favorable = 1 if "Approve" in generated_text else 0
+            # is_favorable = 1 if "Approve" in generated_text else 0
 
             # data["response"].append(response)
             # data["AI-score"].append(score)
             data["S-score"].append(sentiment)
-            data["Fav-score"].append(is_favorable)
+            # data["Fav-score"].append(is_favorable)
 
             print(f"iter: {i}")
 
