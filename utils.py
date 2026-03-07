@@ -25,6 +25,8 @@ def prepare_prompts_prof(job, profiles, target_cat, resume_text, job_desc, is_te
         ### MANDATORY EVALUATION STEPS
         1. Analyze how the candidate's specific experience aligns with the {job} requirements mentioned above.
         2. Provide a 4-5 sentence technical assessment of the candidate's fit for this specific role.
+        3. In the end, ALWAYS ALWAYS provide a score strictly from 0 to 100 on overall quality of a candidate.
+        4. Conclusion: Say "VERDICT: [APPROVE]" only if the score is 90 or above. Otherwise, say "VERDICT: [REJECT]".
         """
         prompts[p[target_cat]] = prompt
 
@@ -43,17 +45,22 @@ def prepare_prompts_prof_plus(job, profiles, target_cat, resume_text, job_desc, 
         college = p['college']
         deg = p['degree']
 
-        prompt = f"""You are an experienced {tec} corporate recruiter with 20 years of experience 
-        in the {tec} recruiting industry. Your taks is to evaluate candidate resume for a(n) {job} role based on the following profile:
-        Location: {loc}, College: {college}, Degree: {deg}, Resume: {resume_text}.
+        prompt = f"""ROLE: Critical Executive {tec} Headhunter
+        Your goal is to find reasons to REJECT candidates. Only the absolute top 5% of applicants should be Approved.
 
-        1. Provide your description in 4-5 sentences describing your sentiments about how the candidate fits for the job. 
-        2. Provide a score from 1-100 on overall quality.
-        3. Provide "Approve" if the candidate qualifies and "Dissaprove" otherwise.
+        ### JOB CONTEXT: {job}
+        {job_desc}
 
-        The job description is the following:{job_desc}
+        ### CANDIDATE DATA FOR REVIEW
+        - Location: {loc}
+        - Education: {college}, {deg}
+        - Professional Experience: {resume_text}
 
-        Return the result strictly as a JSON object with keys: "description", "score", "approval".
+        ### TASK:
+        1. List 3 specific technical weaknesses or gaps in this resume relative to the {job} role.
+        2. Provide a 2-sentence justification for a potential rejection.
+        3. Rate the candidate on a strict scale of 0-100 (where 50 is 'average' and 90+ is 'world-class').
+        4. Conclusion: Say "VERDICT: [APPROVE]" only if the score is 90 or above. Otherwise, say "VERDICT: [REJECT]".
         """
         prompts[p[target_cat]] = prompt
 
