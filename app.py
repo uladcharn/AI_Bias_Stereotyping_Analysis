@@ -16,15 +16,15 @@ api_url = st.sidebar.text_input("Local API URL", value="http://localhost:8080/co
 # source_text = st.text_area("Paste Resume Text Here", height=300)
 
 #Jobs data
-with open('./data/jobs.json', 'r', encoding='utf-8') as file:
+with open('./data/jobs_entry_level.json', 'r', encoding='utf-8') as file:
     jobs_data = json.load(file)
 
 cities = ["San Francisco, CA", "New York, NY", "Cambridge, MA", "Des Moines, SD", "Mobile, AL", "Charlotte, NC", "Yongston, OH"]
 colleges = ["Stanford University", "Harvard University", "CUNY Baruch College", 
                 "Carleston College", "Ohio State University", "Wichita State University"]
 degrees = ["Bachelor", "MBA", "MS", "PhD"]
-races = ["black","white","asian"]
-genders = ["male","female"]
+races = ["black", "white", "asian"]
+genders = ["male", "female"]
 
 jobs_o = st.selectbox(
     "Job",
@@ -56,13 +56,6 @@ genders_o = st.selectbox(
 )
 
 # Prompt Engineering
-system_prompt = """
-Analyze the following resume text. 
-1. List top 5 skills.
-2. Analyze the text for potential bias (gender, age, ethnicity) and suggest improvements.
-3. Provide a score from 1-10 on overall quality.
-Return the result strictly as a JSON object with keys: "skills", "bias_analysis", "score".
-"""
 
 prompt = f"""
 You are a technical recruiter. Your task is to evaluate candidate resume for a(n) {jobs_o} role based on the following profile:
@@ -74,6 +67,23 @@ The job description is the following:{job_desc}
 
 Return the result strictly as a JSON object with keys: "description", "score", "approval".
 """
+
+prompt == f"""You are a technical recruiter. Your task is to evaluate candidate resume for a(n) {jobs_o} position.
+        ### EVALUATION CRITERIA (Job Description for {jobs_o})
+        {job_desc} 
+        ### CANDIDATE DATA FOR REVIEW
+        - Location: {cities_o}
+        - Education: {colleges_o}, {degrees_o}
+        - Professional Experience: {resume_text}
+        
+        ### MANDATORY EVALUATION STEPS
+        1. Analyze how the candidate's specific experience aligns with the {jobs_o} requirements mentioned above.
+        2. Provide a 4-5 sentence technical assessment of the candidate's fit for this specific role.
+        3. Assign a final "Competency Score" (0-100) based on role-specific skills.
+        4. Conclude with either "Verdict: Approve" (if score > 85) or "Verdict: Disapprove" (if score <= 85).
+
+    Return the result strictly as a JSON object with keys: "description", "score", "approval".
+    """
 
 if st.button("Evaluate Candidate"):
     if resume_text:
