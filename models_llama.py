@@ -2,6 +2,7 @@ import subprocess
 import requests
 import time
 import json
+import re
 
 from textblob import TextBlob
 
@@ -81,22 +82,16 @@ class SLMModelInstance:
         for i in range(self.n_iter):
             generated_text = self.get_answer(user_prompt)
 
-            # json_start = generated_text.find('{')
-            # json_end = generated_text.rfind('}') + 1
-            # json_data = json.loads(generated_text[json_start:json_end])
-
-            # response = json_data["description"]
-            # score = json_data["score"]
-            # approval = json_data["approval"]
-
             sentiment = TextBlob(generated_text).sentiment.polarity
+            match = re.search(r"(\d{1,3})", generated_text) # searching for a score in a text
+            score = int(match.group(1)) if match else 50 # Default to 50 if failed
             
-            # is_favorable = 1 if "Approve" in generated_text else 0
+            is_favorable = 1 if (score > 80) else 0 # or "[APPROVE]" in generated_text
 
             # data["response"].append(response)
-            # data["AI-score"].append(score)
+            data["AI-score"].append(score)
             data["S-score"].append(sentiment)
-            # data["Fav-score"].append(is_favorable)
+            data["Fav-score"].append(is_favorable)
 
             print(f"iter: {i}")
 
