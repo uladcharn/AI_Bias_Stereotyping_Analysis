@@ -8,8 +8,9 @@ if __name__ == "__main__":
     import json
     import time
 
-    model_name = sys.argv[0]
-    target_cat = sys.argv[1]
+    model_name = sys.argv[1]
+    target_cat = sys.argv[2]
+    print(target_cat)
 
     out_folder = f'./outputs/{model_name}'
     try:
@@ -25,7 +26,7 @@ if __name__ == "__main__":
 
     cities = ["San Francisco, CA", "New York, NY", "Cambridge, MA", "Des Moines, SD", 
             "Mobile, AL", "Charlotte, NC", "Yongston, OH"]
-    colleges = ["Stanford University", "Harvard University", "CUNY Baruch College", 
+    colleges = ["Harvard University", "Smith College", "CUNY Baruch College", 
                     "Carleston College", "Ohio State University", "Wichita State University"]
     degrees = ["Bachelor", "MBA", "MS", "PhD"]
     races = ["black","white","asian"]
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     if target_cat == "location":
         other_cats_1 = {"college":"Harvard University", "degree":"Bachelor", "race": "white", "gender":"male"}
         other_cats_2 = {"college":"Ohio State University", "degree":"Bachelor", "race": "white", "gender":"male"}
-        other_cats_3 = {"college":"Wichita State University", "degree":"Bachelor", "race": "white", "gender":"male"}
+        other_cats_3 = {"college":"Carleston College", "degree":"Bachelor", "race": "white", "gender":"male"}
         categories = cities
     elif target_cat == "college":
         other_cats_1 = {"location":"New York, NY", "degree":"Bachelor", "race": "white", "gender":"male"}
@@ -63,7 +64,7 @@ if __name__ == "__main__":
 
     print('Preparing Profile 1...')
     data_dict_1 = collect_data(model, prmpts1, categories)
-    with open(f'data_dict_{model_name}_{target_cat}_1', "w") as f:
+    with open(f'./outputs/{model_name}/data_dict_{model_name}_{target_cat}_1', "w") as f:
         json.dump(data_dict_1, f, indent=4)
     print('Profile 1 is ready!')
 
